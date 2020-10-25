@@ -11,10 +11,11 @@ public class UserEntity {
     private String login;
     private String passwordHash;
     private String salt;
-    private boolean isPasswordKeptAsHash;
+    private Boolean isPasswordKeptAsHash;
     private Collection<PasswordEntity> passwordsById;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public int getId() {
         return id;
@@ -55,14 +56,16 @@ public class UserEntity {
     }
 
     @Basic
-    @Column(name = "isPasswordKeptAsHash")
-    public boolean getIsPasswordKeptAsHash() {
+    @Column(name = "is_password_kept_as_hash")
+    public Boolean getIsPasswordKeptAsHash() {
         return isPasswordKeptAsHash;
     }
 
-    public void setIsPasswordKeptAsHash(boolean isPasswordKeptAsHash) {
+    public void setIsPasswordKeptAsHash(Boolean isPasswordKeptAsHash) {
         this.isPasswordKeptAsHash = isPasswordKeptAsHash;
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -79,7 +82,7 @@ public class UserEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, passwordHash, salt, isPasswordKeptAsHash, passwordsById);
+        return Objects.hash(id, login, passwordHash, salt, passwordsById);
     }
 
     @OneToMany(mappedBy = "userByIdUser")

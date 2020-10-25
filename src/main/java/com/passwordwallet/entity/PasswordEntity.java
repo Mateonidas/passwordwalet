@@ -14,6 +14,7 @@ public class PasswordEntity {
     private UserEntity userByIdUser;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public int getId() {
         return id;
