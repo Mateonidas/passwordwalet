@@ -11,7 +11,7 @@ public class UserEntity {
     private String login;
     private String passwordHash;
     private String salt;
-    private Boolean isPasswordKeptAsHash;
+    private String usedAlgorithm;
     private Collection<PasswordEntity> passwordsById;
 
     @Id
@@ -56,13 +56,13 @@ public class UserEntity {
     }
 
     @Basic
-    @Column(name = "is_password_kept_as_hash")
-    public Boolean getIsPasswordKeptAsHash() {
-        return isPasswordKeptAsHash;
+    @Column(name = "used_algorithm")
+    public String getUsedAlgorithm() {
+        return usedAlgorithm;
     }
 
-    public void setIsPasswordKeptAsHash(Boolean isPasswordKeptAsHash) {
-        this.isPasswordKeptAsHash = isPasswordKeptAsHash;
+    public void setUsedAlgorithm(String isPasswordKeptAsHash) {
+        this.usedAlgorithm = isPasswordKeptAsHash;
     }
 
 
@@ -73,7 +73,7 @@ public class UserEntity {
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
         return id == that.id &&
-                isPasswordKeptAsHash == that.isPasswordKeptAsHash &&
+                usedAlgorithm == that.usedAlgorithm &&
                 Objects.equals(login, that.login) &&
                 Objects.equals(passwordHash, that.passwordHash) &&
                 Objects.equals(salt, that.salt) &&
