@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Save Password</title>
+    <title>Registration Page</title>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -19,30 +19,33 @@
     <h3>Password Wallet</h3>
     <hr>
 
-    <p class="h4 mb-4">Save Password</p>
+    <p class="h4 mb-4">Registration</p>
 
-    <form action="#" th:action="@{/passwords/save}"
-          th:object="${passwordEntity}" method="POST">
+    <form action="#" th:action="@{/users/save}"
+          th:object="${userEntity}" method="POST">
 
         <input type="hidden" th:field="*{id}"/>
 
         <input type="text" th:field="*{login}"
                class="form-control mb-4 col-4" placeholder="Login">
 
-        <input type="text" th:field="*{password}"
+        <input type="password" th:field="*{passwordHash}"
                class="form-control mb-4 col-4" placeholder="Password">
 
-        <input type="text" th:field="*{webAddress}"
-               class="form-control mb-4 col-4" placeholder="Web address">
+        <div class="form-group">
+            <label for="controlSelect"> Choose algorithm: </label>
+            <select class="form-control" id="controlSelect" th:field="*{usedAlgorithm}">
+                <option th:value="'SHA-512'" th:text="SHA-512"></option>
+                <option th:value="'HMAC'" th:text="HMAC"></option>
+            </select>
+        </div>
 
-        <input type="text" th:field="*{description}"
-               class="form-control mb-4 col-4" placeholder="Description">
 
         <button type="submit" class="btn btn-info col-2">Save</button>
     </form>
 
     <hr>
-    <a th:href="@{/passwords/list}">Back to Passwords List</a>
+    <a th:href="@{/login}">Back to Login Page</a>
 </div>
 
 </body>

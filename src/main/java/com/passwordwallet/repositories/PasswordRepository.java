@@ -1,6 +1,6 @@
-package com.passwordwallet.dao;
+package com.passwordwallet.repositories;
 
-import com.passwordwallet.entity.PasswordEntity;
+import com.passwordwallet.entities.PasswordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

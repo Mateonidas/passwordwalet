@@ -1,11 +1,11 @@
-package com.passwordwallet.controller;
+package com.passwordwallet.controllers;
 
-import com.passwordwallet.entity.PasswordEntity;
-import com.passwordwallet.entity.UserEntity;
+import com.passwordwallet.entities.PasswordEntity;
+import com.passwordwallet.entities.UserEntity;
 import com.passwordwallet.objects.NewPassword;
 import com.passwordwallet.security.EncryptionService;
-import com.passwordwallet.service.PasswordService;
-import com.passwordwallet.service.UserService;
+import com.passwordwallet.services.PasswordService;
+import com.passwordwallet.services.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,11 +26,15 @@ public class PasswordController {
         this.passwordService = passwordService;
     }
 
+    //Mapping for page with list of passwords
     @GetMapping("/list")
     public String listPasswords(Model model, HttpSession session) {
 
+        //Get user from session
         UserEntity user = (UserEntity) session.getAttribute("user");
+        //Get users passwords
         List<PasswordEntity> passwords = passwordService.findAllByIdUser(user.getId());
+        //Hide passwords while viewing
         EncryptionService.hidePasswords(passwords, session);
 
         model.addAttribute("passwords", passwords);
@@ -38,6 +42,7 @@ public class PasswordController {
         return "passwords/list";
     }
 
+    //Mapping for page with adding new password
     @GetMapping("/showFormForAdd")
     public String showFormForAdd(Model model) {
 
@@ -47,17 +52,20 @@ public class PasswordController {
         return "passwords/password-form";
     }
 
+    //Mapping for page with updating password password
     @GetMapping("/showFormForUpdate")
     public String showFormForUpdate(@RequestParam("passwordId") int id, Model model) throws Exception {
 
         PasswordEntity password = passwordService.findById(id);
 
+        //Displaying the decrypted password during the update
         password.setPassword(EncryptionService.decrypt(password.getPassword()));
         model.addAttribute("passwordEntity", password);
 
         return "passwords/password-form";
     }
 
+    //Mapping for deleting password
     @GetMapping("/delete")
     public String delete(@RequestParam("passwordId") int id) {
         passwordService.deleteById(id);
@@ -65,10 +73,12 @@ public class PasswordController {
         return "redirect:/passwords/list";
     }
 
+    //Mapping for saving password
     @PostMapping("/save")
     public String save(@ModelAttribute("passwordEntity") PasswordEntity password, HttpSession session) throws Exception {
         UserEntity user = (UserEntity) session.getAttribute("user");
         password.setUserByIdUser(user);
+        //Encrypting password after it is saved
         password.setPassword(EncryptionService.encrypt(password.getPassword(), null));
 
         passwordService.save(password);
@@ -76,56 +86,75 @@ public class PasswordController {
         return "redirect:/passwords/list";
     }
 
+    //Mapping a password marked as visible
     @GetMapping("/showPassword")
     public String showPassword(@RequestParam("passwordId") int id, HttpSession session) {
         session.setAttribute("passwordToShow", id);
         return "redirect:/passwords/list";
     }
 
+    //Mapping for change master password page
     @GetMapping("/changePassword")
     public String changePassword(Model model) {
         model.addAttribute("newPassword", new NewPassword());
-        return "change-password";
+        return "/passwords/change-password";
     }
 
+    //Mapping for change master password
     @PostMapping("/changePassword")
     public String changePassword(@ModelAttribute NewPassword newPassword, Model model) {
 
-        if (!newPassword.getNewPassword().equals(newPassword.getRepeatPassword())) {
+        //Get the value of the new password
+        String password = newPassword.getNewPassword();
+        String algorithm = newPassword.getAlgorithm();
+
+        //Validation of the entered data
+        if (password.isEmpty() || !password.equals(newPassword.getRepeatPassword())) {
             model.addAttribute("hasErrors", "true");
         } else {
+            //Get user by login
             String login = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
             UserEntity user = userService.findByLogin(login).get();
             String hashedPassword;
 
-            if (newPassword.getAlgorithm().equals("SHA-512")) {
+            //Check which algorithm was chosen
+            if (algorithm.equals("SHA-512")) {
+                //Generate salt
                 String salt = EncryptionService.generateSalt();
+                //Encryption of new master password in SHA-512
                 hashedPassword = EncryptionService.encryptMasterPassword(
-                        newPassword.getNewPassword(),
+                        password,
                         salt,
-                        newPassword.getAlgorithm());
+                        algorithm);
+                //Set user salt
                 user.setSalt(salt);
             } else {
+                //Encryption of new master password in HMAC
                 hashedPassword = EncryptionService.encryptMasterPassword(
-                        newPassword.getNewPassword(),
+                        password,
                         "",
-                        newPassword.getAlgorithm());
+                        algorithm);
+                //Cleat user salt
                 user.setSalt("");
             }
 
-
-
-            List<PasswordEntity> passwords = passwordService.findAllByIdUser(user.getId());
-            EncryptionService.changePasswordsEncryption(passwords, newPassword.getNewPassword());
-            passwordService.saveAll(passwords);
-
+            //Set new master password
             user.setPasswordHash(hashedPassword);
-            user.setUsedAlgorithm(newPassword.getAlgorithm());
+            //Set new used algorithm
+            user.setUsedAlgorithm(algorithm);
+            //Save modified user
             userService.save(user);
+
+            //Get all user passwords
+            List<PasswordEntity> passwords = passwordService.findAllByIdUser(user.getId());
+            //Change passwords encryption due to the change of encryption of master password
+            passwords = EncryptionService.changePasswordsEncryption(passwords, password);
+            //Save all passwords
+            passwordService.saveAll(passwords);
 
             model.addAttribute("hasErrors", "false");
         }
 
-        return "change-password";
+        return "/passwords/change-password";
     }
 }

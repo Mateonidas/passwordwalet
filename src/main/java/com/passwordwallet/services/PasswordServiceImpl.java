@@ -1,7 +1,7 @@
-package com.passwordwallet.service;
+package com.passwordwallet.services;
 
-import com.passwordwallet.dao.PasswordRepository;
-import com.passwordwallet.entity.PasswordEntity;
+import com.passwordwallet.repositories.PasswordRepository;
+import com.passwordwallet.entities.PasswordEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +16,6 @@ public class PasswordServiceImpl implements PasswordService {
     @Autowired
     public PasswordServiceImpl(PasswordRepository passwordRepository) {
         this.passwordRepository = passwordRepository;
-    }
-
-    @Override
-    public List<PasswordEntity> findAll() {
-        return passwordRepository.findAll();
     }
 
     @Override

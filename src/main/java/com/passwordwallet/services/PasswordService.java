@@ -1,20 +1,14 @@
-package com.passwordwallet.service;
+package com.passwordwallet.services;
 
-import com.passwordwallet.entity.PasswordEntity;
+import com.passwordwallet.entities.PasswordEntity;
 
 import java.util.List;
 
 public interface PasswordService {
 
-    List<PasswordEntity> findAll();
-
     PasswordEntity findById(int id);
-
     List<PasswordEntity> findAllByIdUser(int idUser);
-
     void save(PasswordEntity password);
-
     void deleteById(int id);
-
     void saveAll(List<PasswordEntity> passwords);
 }

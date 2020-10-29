@@ -1,8 +1,7 @@
-package com.passwordwallet.entity;
+package com.passwordwallet.entities;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.Objects;
 
 @Entity
 @Table(name = "user", schema = "password_wallet")
@@ -63,26 +62,6 @@ public class UserEntity {
 
     public void setUsedAlgorithm(String isPasswordKeptAsHash) {
         this.usedAlgorithm = isPasswordKeptAsHash;
-    }
-
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserEntity that = (UserEntity) o;
-        return id == that.id &&
-                usedAlgorithm == that.usedAlgorithm &&
-                Objects.equals(login, that.login) &&
-                Objects.equals(passwordHash, that.passwordHash) &&
-                Objects.equals(salt, that.salt) &&
-                Objects.equals(passwordsById, that.passwordsById);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, login, passwordHash, salt, passwordsById);
     }
 
     @OneToMany(mappedBy = "userByIdUser")

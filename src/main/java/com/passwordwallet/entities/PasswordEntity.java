@@ -1,4 +1,4 @@
-package com.passwordwallet.entity;
+package com.passwordwallet.entities;
 
 import javax.persistence.*;
 
@@ -72,34 +72,6 @@ public class PasswordEntity {
 
     public void setLogin(String login) {
         this.login = login;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PasswordEntity that = (PasswordEntity) o;
-
-        if (id != that.id) return false;
-        if (password != null ? !password.equals(that.password) : that.password != null) return false;
-        if (idUser != null ? !idUser.equals(that.idUser) : that.idUser != null) return false;
-        if (webAddress != null ? !webAddress.equals(that.webAddress) : that.webAddress != null) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-        if (login != null ? !login.equals(that.login) : that.login != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (idUser != null ? idUser.hashCode() : 0);
-        result = 31 * result + (webAddress != null ? webAddress.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (login != null ? login.hashCode() : 0);
-        return result;
     }
 
     @ManyToOne

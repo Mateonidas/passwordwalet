@@ -1,6 +1,6 @@
 package com.passwordwallet.security;
 
-import com.passwordwallet.entity.PasswordEntity;
+import com.passwordwallet.entities.PasswordEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,6 @@ import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -37,6 +36,7 @@ public class EncryptionService {
         EncryptionService.plainPassword = plainPassword;
     }
 
+    //Encryption of master password
     public static String encryptMasterPassword(String password, String salt, String usedAlgorithm){
 
         String encryption;
@@ -50,10 +50,8 @@ public class EncryptionService {
         return encryption;
     }
 
+    //Calculate SHA-512 for password
     private static String calculateSHA512(String text) {
-
-        //String SHA512Hash= calculateSHA512(pepper+salt+text);
-
         try {
             //get an instance of SHA-512
             MessageDigest md = MessageDigest.getInstance("SHA-512");
@@ -82,6 +80,7 @@ public class EncryptionService {
         }
     }
 
+    //Generate salt
     public static String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[20];
@@ -90,6 +89,7 @@ public class EncryptionService {
         return salt.toString();
     }
 
+    //Calculate HMAC for password
     private static String calculateHMAC(String text, String key){
         Mac sha512Hmac;
         String result="";
@@ -111,6 +111,7 @@ public class EncryptionService {
         return new SecretKeySpec(calculateMD5(password), ALGO);
     }
 
+    //Calculate MD5 for master password
     private static byte[] calculateMD5(String text) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -147,10 +148,14 @@ public class EncryptionService {
         return new String(decValue);
     }
 
+    //Hide user passwords
     public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session){
+
+        //Check if any of the passwords have been marked as visible
         if (session.getAttribute("passwordToShow") != null) {
             int id = (int) session.getAttribute("passwordToShow");
 
+            //Decrypt chosen password and hide the rest
             passwords.forEach(password -> {
                 if (password.getId() == id) {
                     try {
@@ -163,6 +168,7 @@ public class EncryptionService {
                 }
             });
         } else {
+            //Hide all passwords
             passwords.forEach(password -> {
                 password.setPassword("**********");
             });
@@ -171,8 +177,10 @@ public class EncryptionService {
         return passwords;
     }
 
+    //Change passwords encryption after changing the master password
     public static List<PasswordEntity> changePasswordsEncryption(List<PasswordEntity> passwords, String newPassword){
 
+        //Encrypts each password with a new master password
         passwords.forEach(password -> {
             try {
                 password.setPassword(
@@ -185,6 +193,7 @@ public class EncryptionService {
             }
         });
 
+        //Store new plain password to further password encryption
         EncryptionService.setPlainPassword(newPassword);
         return passwords;
     }

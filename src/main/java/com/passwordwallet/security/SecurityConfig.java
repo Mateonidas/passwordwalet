@@ -14,22 +14,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationProvider authenticationProvider;
 
+    //Set authentication provider
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    public void configure(AuthenticationManagerBuilder auth){
         auth.authenticationProvider(authenticationProvider);
     }
 
+    //Configure Spring Security
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        //TODO add error page
         http
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
+                    .antMatchers("/users/**").permitAll()
+                    .anyRequest().authenticated()
+                    .and()
                 .formLogin()
-                .loginPage("/login").permitAll();
+                    .loginPage("/login").permitAll()
+                    .and()
+                .logout()
+                    .logoutSuccessUrl("/login");
     }
 }
