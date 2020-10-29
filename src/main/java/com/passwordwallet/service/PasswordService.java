@@ -10,6 +10,8 @@ public interface PasswordService {
 
     PasswordEntity findById(int id);
 
+    List<PasswordEntity> findAllByIdUser(int idUser);
+
     void save(PasswordEntity password);
 
     void deleteById(int id);

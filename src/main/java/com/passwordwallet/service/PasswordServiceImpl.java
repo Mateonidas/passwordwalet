@@ -3,10 +3,12 @@ package com.passwordwallet.service;
 import com.passwordwallet.dao.PasswordRepository;
 import com.passwordwallet.entity.PasswordEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class PasswordServiceImpl implements PasswordService {
 
     private PasswordRepository passwordRepository;
@@ -35,6 +37,12 @@ public class PasswordServiceImpl implements PasswordService {
 
         return passwordEntity;
     }
+
+    @Override
+    public List<PasswordEntity> findAllByIdUser(int idUser) {
+        return passwordRepository.findAllByIdUser(idUser);
+    }
+
 
     @Override
     public void save(PasswordEntity password) {

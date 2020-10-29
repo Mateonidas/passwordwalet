@@ -39,6 +39,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Optional<UserEntity> findByLogin(String login) {
+        return userRepository.findByLogin(login);
+    }
+
+    @Override
     public void save(UserEntity user) {
         userRepository.save(user);
     }

@@ -1,29 +1,26 @@
 package com.passwordwallet.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.passwordwallet.entity.PasswordEntity;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Base64;
-
-import static javax.xml.crypto.dsig.SignatureMethod.HMAC_SHA512;
+import java.util.List;
 
 @Component
 public class EncryptionService {
 
+    private static final String ALGO = "AES";
     private static String hmacKey;
-
     private static String pepper;
+    private static String plainPassword;
 
     @Value("${properties.hmac-key}")
     public void setHmacKey(String hmacKey) {
@@ -80,12 +77,12 @@ public class EncryptionService {
         }
     }
 
-    public static byte[] generateSalt() {
+    public static String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[20];
         random.nextBytes(salt);
 
-        return salt;
+        return salt.toString();
     }
 
     private static String calculateHMAC(String text, String key){
@@ -105,4 +102,69 @@ public class EncryptionService {
         return result;
     }
 
+    // Generate a new encryption key.
+    private static Key generateKey(String password) throws Exception {
+        return new SecretKeySpec(calculateMD5(password), ALGO);
+    }
+
+    private static byte[] calculateMD5(String text) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(text.getBytes());
+            return messageDigest;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //encrypts string and returns encrypted string
+    public static String encrypt(String data) throws Exception {
+        Key key = generateKey(plainPassword);
+        Cipher c = Cipher.getInstance(ALGO);
+        c.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encVal = c.doFinal(data.getBytes());
+        return Base64.getEncoder().encodeToString(encVal);
+    }
+
+    //decrypts string and returns plain text
+    public static String decrypt(String encryptedData) throws Exception {
+        Key key = generateKey(plainPassword);
+        Cipher c = Cipher.getInstance(ALGO);
+        c.init(Cipher.DECRYPT_MODE, key);
+        byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
+        byte[] decValue = c.doFinal(decodedValue);
+        return new String(decValue);
+    }
+
+    public static void setPlainPassword(String plainPassword) {
+        EncryptionService.plainPassword = plainPassword;
+    }
+
+    public static String getPlainPassword() {
+        return plainPassword;
+    }
+
+    public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session){
+        if (session.getAttribute("passwordToShow") != null) {
+            int id = (int) session.getAttribute("passwordToShow");
+
+            passwords.forEach(password -> {
+                if (password.getId() == id) {
+                    try {
+                        password.setPassword(EncryptionService.decrypt(password.getPassword()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    password.setPassword("**********");
+                }
+            });
+        } else {
+            passwords.forEach(password -> {
+                password.setPassword("**********");
+            });
+        }
+
+        return passwords;
+    }
 }

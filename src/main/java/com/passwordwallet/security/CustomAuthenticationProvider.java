@@ -1,8 +1,8 @@
 package com.passwordwallet.security;
 
-import com.passwordwallet.dao.UserRepository;
 import com.passwordwallet.entity.UserEntity;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.passwordwallet.service.UserService;
+import com.passwordwallet.service.UserServiceImpl;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,8 +14,11 @@ import java.util.Optional;
 @Component
 public class CustomAuthenticationProvider  implements AuthenticationProvider {
 
-    @Autowired
-    UserRepository userRepository;
+    UserService userService;
+
+    public CustomAuthenticationProvider(UserServiceImpl userService) {
+        this.userService = userService;
+    }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -23,7 +26,7 @@ public class CustomAuthenticationProvider  implements AuthenticationProvider {
         String login = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        Optional<UserEntity> users = userRepository.findByLogin(login);
+        Optional<UserEntity> users = userService.findByLogin(login);
 
         if(users.isEmpty()) {
             return null;
@@ -33,6 +36,7 @@ public class CustomAuthenticationProvider  implements AuthenticationProvider {
 
         if(EncryptionService.encryptPassword(password, user.getSalt(), user.getUsedAlgorithm())
             .equals(user.getPasswordHash())){
+            EncryptionService.setPlainPassword(password);
             return new UsernamePasswordAuthenticationToken(login, password, authentication.getAuthorities());
         }
 
