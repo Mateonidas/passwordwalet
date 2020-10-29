@@ -50,6 +50,11 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
+    public void saveAll(List<PasswordEntity> passwords){
+        passwordRepository.saveAll(passwords);
+    }
+
+    @Override
     public void deleteById(int id) {
         passwordRepository.deleteById(id);
     }

@@ -15,4 +15,6 @@ public interface PasswordService {
     void save(PasswordEntity password);
 
     void deleteById(int id);
+
+    void saveAll(List<PasswordEntity> passwords);
 }

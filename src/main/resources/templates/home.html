@@ -1,18 +1,45 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 <head>
-    <title>Spring Security Example</title>
+    <title>Home Page</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 </head>
 <body>
-<h1>Home page</h1>
-<h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
-</br>
 
-<p>Click <a th:href="@{/changePassword}">Change password</a></p>
-<p>Click <a th:href="@{/passwords/list}">Add password</a></p>
+<div class="container">
 
-<form th:action="@{/logout}" method="post">
-    <input type="submit" value="Sign Out"/>
-</form>
+    <h3>Password Wallet</h3>
+    <hr>
+
+    <p class="h4 mb-4">Home Page</p>
+
+    <hr>
+    <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
+    </br>
+
+    <hr>
+    <form th:action="@{/passwords/changePassword}" method="get">
+        <button type="submit" class="btn btn-info col-2">Change password</button>
+    </form>
+
+    <hr>
+    <form th:action="@{/passwords/list}" method="get">
+        <button type="submit" class="btn btn-info col-2">Show passwords</button>
+    </form>
+
+    <hr>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-danger btn-sm">Sign out</button>
+    </form>
+
+</div>
 </body>
 </html>

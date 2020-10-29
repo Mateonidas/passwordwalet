@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -32,7 +33,11 @@ public class EncryptionService {
         EncryptionService.pepper = pepper;
     }
 
-    public static String encryptPassword(String password, String salt, String usedAlgorithm){
+    public static void setPlainPassword(String plainPassword) {
+        EncryptionService.plainPassword = plainPassword;
+    }
+
+    public static String encryptMasterPassword(String password, String salt, String usedAlgorithm){
 
         String encryption;
 
@@ -97,29 +102,35 @@ public class EncryptionService {
             result = Base64.getEncoder().encodeToString(macData);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             e.printStackTrace();
-        } finally {
         }
         return result;
     }
 
     // Generate a new encryption key.
-    private static Key generateKey(String password) throws Exception {
+    public static Key generateKey(String password) throws Exception {
         return new SecretKeySpec(calculateMD5(password), ALGO);
     }
 
     private static byte[] calculateMD5(String text) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] messageDigest = md.digest(text.getBytes());
-            return messageDigest;
+            return md.digest(text.getBytes());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
     //encrypts string and returns encrypted string
-    public static String encrypt(String data) throws Exception {
-        Key key = generateKey(plainPassword);
+    public static String encrypt(String data, Key receivedKey) throws Exception {
+
+        Key key;
+
+        if(receivedKey != null){
+            key = receivedKey;
+        } else {
+            key = generateKey(plainPassword);
+        }
+
         Cipher c = Cipher.getInstance(ALGO);
         c.init(Cipher.ENCRYPT_MODE, key);
         byte[] encVal = c.doFinal(data.getBytes());
@@ -134,14 +145,6 @@ public class EncryptionService {
         byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
         byte[] decValue = c.doFinal(decodedValue);
         return new String(decValue);
-    }
-
-    public static void setPlainPassword(String plainPassword) {
-        EncryptionService.plainPassword = plainPassword;
-    }
-
-    public static String getPlainPassword() {
-        return plainPassword;
     }
 
     public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session){
@@ -165,6 +168,24 @@ public class EncryptionService {
             });
         }
 
+        return passwords;
+    }
+
+    public static List<PasswordEntity> changePasswordsEncryption(List<PasswordEntity> passwords, String newPassword){
+
+        passwords.forEach(password -> {
+            try {
+                password.setPassword(
+                        EncryptionService.encrypt(
+                                EncryptionService.decrypt(password.getPassword()),
+                                EncryptionService.generateKey(newPassword))
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        EncryptionService.setPlainPassword(newPassword);
         return passwords;
     }
 }
