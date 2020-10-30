@@ -109,10 +109,12 @@ public class PasswordController {
 
         //Get the value of the new password
         String password = newPassword.getNewPassword();
+        String oldPassword = newPassword.getOldPassword();
         String algorithm = newPassword.getAlgorithm();
 
+
         //Validation of the entered data
-        if (password.isEmpty() || !password.equals(newPassword.getRepeatPassword())) {
+        if (password.isEmpty() || !password.equals(newPassword.getRepeatPassword()) || !oldPassword.equals(EncryptionService.getPlainPassword())) {
             model.addAttribute("hasErrors", "true");
         } else {
             //Get user by login

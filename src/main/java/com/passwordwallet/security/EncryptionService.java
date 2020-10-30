@@ -32,6 +32,10 @@ public class EncryptionService {
         EncryptionService.pepper = pepper;
     }
 
+    public static String getPlainPassword() {
+        return plainPassword;
+    }
+
     public static void setPlainPassword(String plainPassword) {
         EncryptionService.plainPassword = plainPassword;
     }

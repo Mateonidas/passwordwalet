@@ -3,6 +3,7 @@ package com.passwordwallet.objects;
 public class NewPassword {
 
     private String newPassword;
+    private String oldPassword;
     private String repeatPassword;
     private String algorithm;
 
@@ -12,6 +13,14 @@ public class NewPassword {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 
     public String getRepeatPassword() {
