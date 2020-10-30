@@ -54,13 +54,16 @@ public class PasswordController {
 
     //Mapping for page with updating password password
     @GetMapping("/showFormForUpdate")
-    public String showFormForUpdate(@RequestParam("passwordId") int id, Model model) throws Exception {
+    public String showFormForUpdate(@RequestParam("passwordId") int id, Model model, HttpSession session) throws Exception {
 
         PasswordEntity password = passwordService.findById(id);
 
         //Displaying the decrypted password during the update
         password.setPassword(EncryptionService.decrypt(password.getPassword()));
         model.addAttribute("passwordEntity", password);
+
+        //Clear passwordToShow attribute to hide all passwords on display again
+        session.setAttribute("passwordToShow", null);
 
         return "passwords/password-form";
     }
