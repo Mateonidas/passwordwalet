@@ -55,7 +55,7 @@ public class EncryptionService {
     }
 
     //Calculate SHA-512 for password
-    private static String calculateSHA512(String text) {
+    public static String calculateSHA512(String text) {
         try {
             //get an instance of SHA-512
             MessageDigest md = MessageDigest.getInstance("SHA-512");
@@ -94,7 +94,7 @@ public class EncryptionService {
     }
 
     //Calculate HMAC for password
-    private static String calculateHMAC(String text, String key){
+    public static String calculateHMAC(String text, String key){
         Mac sha512Hmac;
         String result="";
         try {
@@ -126,7 +126,7 @@ public class EncryptionService {
     }
 
     //encrypts string and returns encrypted string
-    public static String encrypt(String data, Key receivedKey) throws Exception {
+    public static String encryptAES(String data, Key receivedKey) throws Exception {
 
         Key key;
 
@@ -143,8 +143,16 @@ public class EncryptionService {
     }
 
     //decrypts string and returns plain text
-    public static String decrypt(String encryptedData) throws Exception {
-        Key key = generateKey(plainPassword);
+    public static String decryptAES(String encryptedData, Key receivedKey) throws Exception {
+
+        Key key;
+
+        if(receivedKey != null){
+            key = receivedKey;
+        } else {
+            key = generateKey(plainPassword);
+        }
+
         Cipher c = Cipher.getInstance(ALGO);
         c.init(Cipher.DECRYPT_MODE, key);
         byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
@@ -163,7 +171,7 @@ public class EncryptionService {
             passwords.forEach(password -> {
                 if (password.getId() == id) {
                     try {
-                        password.setPassword(EncryptionService.decrypt(password.getPassword()));
+                        password.setPassword(EncryptionService.decryptAES(password.getPassword(), null));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -188,8 +196,8 @@ public class EncryptionService {
         passwords.forEach(password -> {
             try {
                 password.setPassword(
-                        EncryptionService.encrypt(
-                                EncryptionService.decrypt(password.getPassword()),
+                        EncryptionService.encryptAES(
+                                EncryptionService.decryptAES(password.getPassword(),null),
                                 EncryptionService.generateKey(newPassword))
                 );
             } catch (Exception e) {

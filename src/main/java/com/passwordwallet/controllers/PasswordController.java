@@ -59,7 +59,7 @@ public class PasswordController {
         PasswordEntity password = passwordService.findById(id);
 
         //Displaying the decrypted password during the update
-        password.setPassword(EncryptionService.decrypt(password.getPassword()));
+        password.setPassword(EncryptionService.decryptAES(password.getPassword(), null));
         model.addAttribute("passwordEntity", password);
 
         //Clear passwordToShow attribute to hide all passwords on display again
@@ -82,7 +82,7 @@ public class PasswordController {
         UserEntity user = (UserEntity) session.getAttribute("user");
         password.setUserByIdUser(user);
         //Encrypting password after it is saved
-        password.setPassword(EncryptionService.encrypt(password.getPassword(), null));
+        password.setPassword(EncryptionService.encryptAES(password.getPassword(), null));
 
         passwordService.save(password);
 
