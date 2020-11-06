@@ -41,11 +41,11 @@ public class EncryptionService {
     }
 
     //Encryption of master password
-    public static String encryptMasterPassword(String password, String salt, String usedAlgorithm){
+    public static String encryptMasterPassword(String password, String salt, String usedAlgorithm) {
 
         String encryption;
 
-        if(usedAlgorithm.equals("SHA-512")){
+        if (usedAlgorithm.equals("SHA-512")) {
             encryption = calculateSHA512(pepper + salt + password);
         } else {
             encryption = calculateHMAC(password, hmacKey);
@@ -94,9 +94,9 @@ public class EncryptionService {
     }
 
     //Calculate HMAC for password
-    public static String calculateHMAC(String text, String key){
+    public static String calculateHMAC(String text, String key) {
         Mac sha512Hmac;
-        String result="";
+        String result = "";
         try {
             final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);
             sha512Hmac = Mac.getInstance("HmacSHA512");
@@ -111,8 +111,12 @@ public class EncryptionService {
     }
 
     // Generate a new encryption key.
-    public static Key generateKey(String password) throws Exception {
-        return new SecretKeySpec(calculateMD5(password), ALGO);
+    public static Key generateKey(String password) {
+        try {
+            return new SecretKeySpec(calculateMD5(password), ALGO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //Calculate MD5 for master password
@@ -126,42 +130,48 @@ public class EncryptionService {
     }
 
     //encrypts string and returns encrypted string
-    public static String encryptAES(String data, Key receivedKey) throws Exception {
+    public static String encryptAES(String data, Key receivedKey) {
+        try {
+            Key key;
 
-        Key key;
+            if (receivedKey != null) {
+                key = receivedKey;
+            } else {
+                key = generateKey(plainPassword);
+            }
 
-        if(receivedKey != null){
-            key = receivedKey;
-        } else {
-            key = generateKey(plainPassword);
+            Cipher c = Cipher.getInstance(ALGO);
+            c.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encVal = c.doFinal(data.getBytes());
+            return Base64.getEncoder().encodeToString(encVal);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        Cipher c = Cipher.getInstance(ALGO);
-        c.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encVal = c.doFinal(data.getBytes());
-        return Base64.getEncoder().encodeToString(encVal);
     }
 
     //decrypts string and returns plain text
-    public static String decryptAES(String encryptedData, Key receivedKey) throws Exception {
+    public static String decryptAES(String encryptedData, Key receivedKey) {
+        try {
+            Key key;
 
-        Key key;
+            if (receivedKey != null) {
+                key = receivedKey;
+            } else {
+                key = generateKey(plainPassword);
+            }
 
-        if(receivedKey != null){
-            key = receivedKey;
-        } else {
-            key = generateKey(plainPassword);
+            Cipher c = Cipher.getInstance(ALGO);
+            c.init(Cipher.DECRYPT_MODE, key);
+            byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
+            byte[] decValue = c.doFinal(decodedValue);
+            return new String(decValue);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        Cipher c = Cipher.getInstance(ALGO);
-        c.init(Cipher.DECRYPT_MODE, key);
-        byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
-        byte[] decValue = c.doFinal(decodedValue);
-        return new String(decValue);
     }
 
     //Hide user passwords
-    public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session){
+    public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session) {
 
         //Check if any of the passwords have been marked as visible
         if (session.getAttribute("passwordToShow") != null) {
@@ -190,14 +200,14 @@ public class EncryptionService {
     }
 
     //Change passwords encryption after changing the master password
-    public static List<PasswordEntity> changePasswordsEncryption(List<PasswordEntity> passwords, String newPassword){
+    public static List<PasswordEntity> changePasswordsEncryption(List<PasswordEntity> passwords, String newPassword) {
 
         //Encrypts each password with a new master password
         passwords.forEach(password -> {
             try {
                 password.setPassword(
                         EncryptionService.encryptAES(
-                                EncryptionService.decryptAES(password.getPassword(),null),
+                                EncryptionService.decryptAES(password.getPassword(), null),
                                 EncryptionService.generateKey(newPassword))
                 );
             } catch (Exception e) {

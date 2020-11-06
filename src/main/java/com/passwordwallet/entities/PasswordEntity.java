@@ -1,6 +1,7 @@
 package com.passwordwallet.entities;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "password", schema = "password_wallet")

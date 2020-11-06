@@ -18,8 +18,20 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Optional<UserEntity> findByLogin(String login) {
-        return userRepository.findByLogin(login);
+    public UserEntity findByLogin(String login) {
+
+        Optional<UserEntity> result = userRepository.findByLogin(login);
+
+        UserEntity userEntity;
+
+        if(result.isPresent()){
+            userEntity = result.get();
+        } else {
+            throw new RuntimeException("Did not find login - " + login);
+        }
+
+        return userEntity;
+
     }
 
     @Override

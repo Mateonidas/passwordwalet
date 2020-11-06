@@ -119,7 +119,7 @@ public class PasswordController {
         } else {
             //Get user by login
             String login = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            UserEntity user = userService.findByLogin(login).get();
+            UserEntity user = userService.findByLogin(login);
             String hashedPassword;
 
             //Check which algorithm was chosen

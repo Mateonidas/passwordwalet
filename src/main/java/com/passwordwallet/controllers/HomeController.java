@@ -31,7 +31,7 @@ public class HomeController {
 
         //Get user login
         String login = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        UserEntity user = userService.findByLogin(login).get();
+        UserEntity user = userService.findByLogin(login);
 
         //Save user in session
         session.setAttribute("user", user);

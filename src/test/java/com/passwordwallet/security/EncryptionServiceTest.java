@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.*;
 class EncryptionServiceTest {
 
     @Test
-    public void calculateHMAC_dataShouldBeEncrypted(){
+    public void shouldReturnTrueIfPasswordWasEncryptedInHMAC(){
 
         var password = "test";
         var key = "key";
@@ -21,7 +21,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    public void calculateSHA512_dataShouldBeEncrypted(){
+    public void shouldReturnTrueIfPasswordWasEncryptedInSHA512(){
         var password = "test";
 
         var encryptedPassword = EncryptionService.calculateSHA512(password);
@@ -30,7 +30,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    public void encryptAES_dataShouldBeEncrypted() throws Exception {
+    public void shouldReturnTrueIfPasswordWasEncryptedInAES() {
         var password = "test";
         Key key = EncryptionService.generateKey("testKey");
 
@@ -40,7 +40,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    public void encryptAES_dataShouldBeDecrypted() throws Exception {
+    public void shouldReturnTrueIfPasswordWasDecryptedInAES() {
         var password = "test";
         Key key = EncryptionService.generateKey("testKey");
         var encryptedPassword = EncryptionService.encryptAES(password, key);

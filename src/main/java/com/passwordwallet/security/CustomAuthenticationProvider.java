@@ -29,13 +29,13 @@ public class CustomAuthenticationProvider  implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         //Check if user exists
-        Optional<UserEntity> users = userService.findByLogin(login);
+        UserEntity user = userService.findByLogin(login);
 
-        if(users.isEmpty()) {
-            return null;
-        }
-
-        UserEntity user = users.get();
+//        if(users.isEmpty()) {
+//            return null;
+//        }
+//
+//        UserEntity user = users.get();
 
         //Compare the provided password with the user's password
         if(EncryptionService.encryptMasterPassword(password, user.getSalt(), user.getUsedAlgorithm())
