@@ -6,123 +6,104 @@ import com.passwordwallet.security.EncryptionService;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@DataJpaTest
-@ActiveProfiles("test")
-@Sql("password.sql")
+@SpringBootTest
 class PasswordServiceTest {
-
-    @Autowired
-    private TestEntityManager testEntityManager;
 
     @InjectMocks
     private PasswordServiceImpl passwordService;
 
-    @Autowired
+    @Mock
     private PasswordRepository passwordRepository;
 
-    @Test
-    void shouldReturnTrueIfPasswordWasFoundById() {
-        passwordService = new PasswordServiceImpl(passwordRepository);
-        Key key = EncryptionService.generateKey("testKey");
-        PasswordEntity password = new PasswordEntity();
-        password.setLogin("Login");
-        password.setDescription("Description");
-        password.setWebAddress("address.pl");
-        password.setIdUser(1);
-        password.setPassword(EncryptionService.encryptAES("Password", key));
-        testEntityManager.persist(password);
-        int id = (int) testEntityManager.getId(password);
+    @ParameterizedTest
+    @MethodSource("providePassword")
+    void shouldReturnTrueIfPasswordWasFoundById(PasswordEntity password) {
+        when(passwordRepository.findById(password.getId()))
+                .thenReturn(java.util.Optional.of(password));
 
-        PasswordEntity find = passwordService.findById(id);
-
+        PasswordEntity find = passwordService.findById(password.getId());
         MatcherAssert.assertThat(password, equalTo(find));
     }
 
     @Test
     void shouldReturnFalseIfNoPasswordWasFoundById() {
-        passwordService = new PasswordServiceImpl(passwordRepository);
-
         Assertions.assertThrows(RuntimeException.class, () -> {
             passwordService.findById(1);
         });
     }
 
-    @Test
-    void shouldReturnTrueIfPasswordWasSuccessfullySaved() {
-        passwordService = new PasswordServiceImpl(passwordRepository);
-        int listSize = passwordRepository.findAll().size();
-        Key key = EncryptionService.generateKey("testKey");
-        PasswordEntity password = new PasswordEntity();
-        password.setLogin("Login");
-        password.setDescription("Description");
-        password.setWebAddress("address.pl");
-        password.setIdUser(1);
-        password.setPassword(EncryptionService.encryptAES("Password", key));
-
+    @ParameterizedTest
+    @MethodSource("providePassword")
+    void shouldReturnTrueIfPasswordWasSuccessfullySaved(PasswordEntity password) {
         passwordService.save(password);
 
-        int listSizeAfterSave = passwordRepository.findAll().size();
-        MatcherAssert.assertThat(listSize + 1, equalTo(listSizeAfterSave));
+        verify(passwordRepository, times(1)).save(password);
     }
 
-    @Test
-    void shouldReturnTrueIfPasswordWasDeleted() {
-        passwordService = new PasswordServiceImpl(passwordRepository);
+    @ParameterizedTest
+    @MethodSource("providePassword")
+    void shouldReturnTrueIfPasswordWasDeleted(PasswordEntity password) {
+        passwordService.deleteById(password.getId());
+
+        verify(passwordRepository, times(1)).deleteById(password.getId());
+    }
+
+    @ParameterizedTest
+    @MethodSource("providePasswords")
+    void shouldReturnTrueIfAllPasswordsWasSaved(List<PasswordEntity> passwordsList) {
+        passwordService.saveAll(passwordsList);
+
+        verify(passwordRepository, times(1)).saveAll(passwordsList);
+    }
+
+    private static Stream<PasswordEntity> providePassword() {
         Key key = EncryptionService.generateKey("testKey");
         PasswordEntity password = new PasswordEntity();
+        password.setId(1);
         password.setLogin("Login");
         password.setDescription("Description");
         password.setWebAddress("address.pl");
         password.setIdUser(1);
         password.setPassword(EncryptionService.encryptAES("Password", key));
-        testEntityManager.persist(password);
-        int id = (int) testEntityManager.getId(password);
 
-        passwordService.deleteById(id);
-
-        int listSize = passwordRepository.findAll().size();
-        MatcherAssert.assertThat(0, equalTo(listSize));
+        return Stream.of(password);
     }
 
-    @Test
-    void shouldReturnTrueIfAllPasswordsWasSaved() {
-        passwordService = new PasswordServiceImpl(passwordRepository);
+    private static Stream<List<PasswordEntity>> providePasswords() {
         Key key = EncryptionService.generateKey("testKey");
-        PasswordEntity password1 = new PasswordEntity();
-        password1.setLogin("Login1");
-        password1.setDescription("Description1");
-        password1.setWebAddress("address.pl");
-        password1.setIdUser(1);
-        password1.setPassword(EncryptionService.encryptAES("Password", key));
+        PasswordEntity password = new PasswordEntity();
+        password.setId(1);
+        password.setLogin("Login");
+        password.setDescription("Description");
+        password.setWebAddress("address.pl");
+        password.setIdUser(1);
+        password.setPassword(EncryptionService.encryptAES("Password", key));
+
         PasswordEntity password2 = new PasswordEntity();
         password2.setLogin("Login2");
         password2.setDescription("Description");
         password2.setWebAddress("address.pl");
         password2.setIdUser(2);
         password2.setPassword(EncryptionService.encryptAES("Password", key));
-        List<PasswordEntity> list = new ArrayList<>();
-        list.add(password1);
-        list.add(password2);
 
-        passwordService.saveAll(list);
+        List<PasswordEntity> passwordsList = new ArrayList<>();
+        passwordsList.add(password);
+        passwordsList.add(password2);
 
-        int listSize = passwordRepository.findAll().size();
-        MatcherAssert.assertThat(list.size(), equalTo(listSize));
+        return Stream.of(passwordsList);
     }
 }

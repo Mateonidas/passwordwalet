@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class PasswordServiceImpl implements PasswordService {
 
-    private PasswordRepository passwordRepository;
+    private final PasswordRepository passwordRepository;
 
     @Autowired
     public PasswordServiceImpl(PasswordRepository passwordRepository) {
@@ -36,6 +36,11 @@ public class PasswordServiceImpl implements PasswordService {
     @Override
     public List<PasswordEntity> findAllByIdUser(int idUser) {
         return passwordRepository.findAllByIdUser(idUser);
+    }
+
+    @Override
+    public List<PasswordEntity> findAll() {
+        return passwordRepository.findAll();
     }
 
     @Override

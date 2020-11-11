@@ -6,69 +6,60 @@ import com.passwordwallet.security.EncryptionService;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@DataJpaTest
-@ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:application-test.properties")
-@Sql("users.sql")
+
+@SpringBootTest
 class UserServiceTest {
-
-    @Autowired
-    private TestEntityManager testEntityManager;
 
     @InjectMocks
     private UserServiceImpl userService;
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Test
-    void shouldReturnTrueIfUserWasSuccessfullySaved(){
-        userService = new UserServiceImpl(userRepository);
-        int listSize = userRepository.findAll().size();
-
-        UserEntity user = new UserEntity();
-        user.setLogin("Login");
-        user.setPasswordHash(EncryptionService.calculateHMAC("Password", "key"));
-        user.setSalt("");
-        user.setUsedAlgorithm("HMAC");
+    @ParameterizedTest
+    @MethodSource("provideUser")
+    void shouldReturnTrueIfUserWasSuccessfullySaved(UserEntity user){
         userService.save(user);
 
-        int listSizeAfterSave = userRepository.findAll().size();
-        MatcherAssert.assertThat(listSize+1, equalTo(listSizeAfterSave));
+        verify(userRepository, times(1)).save(user);
     }
 
-    @Test
-    void shouldReturnTrueIfUserWasFoundByLogin() {
-        userService = new UserServiceImpl(userRepository);
-        UserEntity user = new UserEntity();
-        user.setLogin("Login");
-        user.setPasswordHash(EncryptionService.calculateHMAC("Password", "key"));
-        user.setSalt("");
-        user.setUsedAlgorithm("HMAC");
+    @ParameterizedTest
+    @MethodSource("provideUser")
+    void shouldReturnTrueIfUserWasFoundByLogin(UserEntity user) {
 
-        testEntityManager.persist(user);
+        when(userRepository.findByLogin(user.getLogin()))
+                .thenReturn(java.util.Optional.of(user));
 
-        UserEntity find = userService.findByLogin("Login");
+        UserEntity find = userService.findByLogin(user.getLogin());
         MatcherAssert.assertThat(user, equalTo(find));
     }
 
     @Test
     void shouldReturnFalseIfNoUserWasFoundByLogin() {
-        userService = new UserServiceImpl(userRepository);
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            userService.findByLogin("Test");
+        });
+    }
 
-        Assertions.assertThrows(RuntimeException.class, () -> {userService.findByLogin("Test");});
+    private static Stream<UserEntity> provideUser(){
+        UserEntity user = new UserEntity();
+        user.setLogin("Login");
+        user.setPasswordHash(EncryptionService.calculateHMAC("Password", "key"));
+        user.setSalt("");
+        user.setUsedAlgorithm("HMAC");
+
+        return Stream.of(user);
     }
 }
