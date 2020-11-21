@@ -1,6 +1,8 @@
 package com.passwordwallet.controllers;
 
+import com.passwordwallet.entities.LoginEntity;
 import com.passwordwallet.entities.UserEntity;
+import com.passwordwallet.services.LoginService;
 import com.passwordwallet.services.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -14,9 +16,11 @@ import javax.servlet.http.HttpSession;
 public class HomeController {
 
     private UserService userService;
+    private LoginService loginService;
 
-    public HomeController(UserService userService) {
+    public HomeController(UserService userService, LoginService loginService) {
         this.userService = userService;
+        this.loginService = loginService;
     }
 
     //Mapping for login page
@@ -37,6 +41,13 @@ public class HomeController {
         session.setAttribute("user", user);
         //Clear passwordToShow attribute to hide all passwords on display again
         session.setAttribute("passwordToShow", null);
+
+        LoginEntity lastSuccess = loginService.findLastTimestampWithSuccess();
+        LoginEntity lastFailure = loginService.findLastTimestampWithFailure();
+
+        //TODO change time format
+        session.setAttribute("lastSuccess", lastSuccess.getTime());
+        session.setAttribute("lastFailure", lastFailure.getTime());
 
         return "home";
     }

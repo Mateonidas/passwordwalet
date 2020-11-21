@@ -1,0 +1,15 @@
+spring:
+  datasource:
+#TODO change timezone
+    url: jdbc:mysql://localhost:3306/password_wallet?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+    show-sql: false
+
+properties:
+  hmac-key: hmackey
+  pepper: 8cbbcf29d9cef89675c5f5c1dcfe827d0570416a5aaba30dd0de159661ad905b

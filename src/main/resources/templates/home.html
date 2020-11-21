@@ -23,6 +23,8 @@
 
     <hr>
     <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
+    <p th:inline="text">Last successful login: [[${session.lastSuccess}]]</p>
+    <p th:inline="text">Last failed login: [[${session.lastFailure}]]</p>
     </br>
 
     <hr>

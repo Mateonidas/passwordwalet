@@ -20,23 +20,25 @@
 
     <p class="h4 mb-4">Login Page</p>
 
-    <div th:if="${param.error}">
-        Invalid username and password.
-    </div>
+<!--    TODO: remove exception code-->
+    <div th:if="${param.error}"
+         th:with="errorMsg=${session['SPRING_SECURITY_LAST_EXCEPTION']}">
+    <span th:text="${errorMsg}"></span>
+</div>
 
-    <form th:action="@{/login}" method="POST">
+<form th:action="@{/login}" method="POST">
 
-        <input type="text" class="form-control mb-4 col-4" name="username" placeholder="Login">
-        <input type="password" class="form-control mb-4 col-4" name="password" placeholder="Password">
+    <input type="text" class="form-control mb-4 col-4" name="username" placeholder="Login">
+    <input type="password" class="form-control mb-4 col-4" name="password" placeholder="Password">
 
-        <button type="submit" class="btn btn-info col-2">Sign In</button>
-    </form>
+    <button type="submit" class="btn btn-info col-2">Sign In</button>
+</form>
 
-    <hr>
-    <a th:href="@{/users/showFormForRegistration}"
-       class="btn btn-primary btn-sm mb-3">
-        Sign up
-    </a>
+<hr>
+<a th:href="@{/users/showFormForRegistration}"
+   class="btn btn-primary btn-sm mb-3">
+    Sign up
+</a>
 
 </div>
 
