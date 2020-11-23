@@ -25,6 +25,14 @@
     <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
     <p th:inline="text">Last successful login: [[${session.lastSuccess}]]</p>
     <p th:inline="text">Last failed login: [[${session.lastFailure}]]</p>
+
+    <th:block th:if="${session.blockedIpAddresses != null}">
+        <p th:inline="text">Blocked IP addresses</p>
+        <div th:each="blockedIpAddress : ${session.blockedIpAddresses}">
+            <p th:text="${blockedIpAddress.getIpAddress}"></p>
+        </div>
+    </th:block>
+
     </br>
 
     <hr>
@@ -35,6 +43,11 @@
     <hr>
     <form th:action="@{/passwords/list}" method="get">
         <button type="submit" class="btn btn-info col-2">Show passwords</button>
+    </form>
+
+    <hr>
+    <form th:action="@{/unlockIP}" method="get">
+        <button type="submit" class="btn btn-info col-2">Unlock IP</button>
     </form>
 
     <hr>

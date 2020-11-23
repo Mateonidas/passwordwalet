@@ -1,7 +1,9 @@
 package com.passwordwallet.controllers;
 
+import com.passwordwallet.entities.IpAddressEntity;
 import com.passwordwallet.entities.LoginEntity;
 import com.passwordwallet.entities.UserEntity;
+import com.passwordwallet.services.IpAddressService;
 import com.passwordwallet.services.LoginService;
 import com.passwordwallet.services.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,17 +12,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 @RequestMapping
 public class HomeController {
 
-    private UserService userService;
-    private LoginService loginService;
+    private final UserService userService;
+    private final LoginService loginService;
+    private final IpAddressService ipAddressService;
 
-    public HomeController(UserService userService, LoginService loginService) {
+    public HomeController(UserService userService, LoginService loginService, IpAddressService ipAddressService) {
         this.userService = userService;
         this.loginService = loginService;
+        this.ipAddressService = ipAddressService;
     }
 
     //Mapping for login page
@@ -45,10 +50,35 @@ public class HomeController {
         LoginEntity lastSuccess = loginService.findLastTimestampWithSuccess();
         LoginEntity lastFailure = loginService.findLastTimestampWithFailure();
 
+        List<IpAddressEntity> blockedIpAddresses = ipAddressService.findBlockedIpAddresses();
+
         //TODO change time format
         session.setAttribute("lastSuccess", lastSuccess.getTime());
-        session.setAttribute("lastFailure", lastFailure.getTime());
+
+        if(lastFailure != null) {
+            session.setAttribute("lastFailure", lastFailure.getTime());
+        } else {
+            session.setAttribute("lastFailure", "No data");
+        }
+
+        session.setAttribute("blockedIpAddresses", blockedIpAddresses);
 
         return "home";
+    }
+
+    @GetMapping("/unlockIP")
+    public String unlockIp(){
+
+        List<IpAddressEntity> blockedIpAddresses = ipAddressService.findBlockedIpAddresses();
+
+        if(!blockedIpAddresses.isEmpty()){
+            blockedIpAddresses.forEach(ipAddressEntity ->{
+                ipAddressEntity.setIncorrectLoginTrial(0);
+            });
+        }
+
+        ipAddressService.saveAll(blockedIpAddresses);
+
+        return "redirect:";
     }
 }
