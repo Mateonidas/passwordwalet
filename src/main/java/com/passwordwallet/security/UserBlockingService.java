@@ -54,10 +54,10 @@ public class UserBlockingService {
         LoginEntity lastFailure = loginService.findLastTimestampWithFailure();
 
         if(lastFailure != null){
-            if (!checkIfBlockedByIP(lastFailure.getTime(), ipAddressEntity.getIncorrectLoginTrial())){
+            if (checkIfBlockedByIP(lastFailure.getTime(), ipAddressEntity.getIncorrectLoginTrial())){
                 throw new DisabledException("User is blocked by IP address.");
             }
-            else if (!checkIfBlockedByAttempts(lastFailure.getTime(), user.getIncorrectLogins())) {
+            else if (checkIfBlockedByAttempts(lastFailure.getTime(), user.getIncorrectLogins())) {
                 throw new DisabledException("User is blocked.");
             }
         }
@@ -92,18 +92,18 @@ public class UserBlockingService {
         if (attempts == 2) {
             int sec = 5;
             Timestamp later = new Timestamp(time.getTime() + (sec * 1000L));
-            return currentTime.after(later);
+            return !currentTime.after(later);
         } else if (attempts == 3) {
             int sec = 10;
             Timestamp later = new Timestamp(time.getTime() + (sec * 1000L));
-            return currentTime.after(later);
+            return !currentTime.after(later);
         } else if (attempts >= 4) {
             int sec = 120;
             Timestamp later = new Timestamp(time.getTime() + (sec * 1000L));
-            return currentTime.after(later);
+            return !currentTime.after(later);
         }
 
-        return true;
+        return false;
     }
 
     public boolean checkIfBlockedByIP(Timestamp time, int attempts) {
@@ -113,15 +113,11 @@ public class UserBlockingService {
         if (attempts == 2) {
             int sec = 5;
             Timestamp later = new Timestamp(time.getTime() + (sec * 1000L));
-            return currentTime.after(later);
+            return !currentTime.after(later);
         } else if (attempts == 3) {
             int sec = 10;
             Timestamp later = new Timestamp(time.getTime() + (sec * 1000L));
-            return currentTime.after(later);
-        } else if (attempts >= 4) {
-            return false;
-        }
-
-        return true;
+            return !currentTime.after(later);
+        } else return attempts >= 4;
     }
 }

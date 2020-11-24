@@ -14,6 +14,4 @@ public interface IpAddressService {
     IpAddressEntity save(IpAddressEntity ipAddressEntity);
 
     List<IpAddressEntity> findBlockedIpAddresses();
-
-    List<IpAddressEntity> saveAll(List<IpAddressEntity> ipAddressEntities);
 }

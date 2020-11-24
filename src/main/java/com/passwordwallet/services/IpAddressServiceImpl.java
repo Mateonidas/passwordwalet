@@ -19,7 +19,7 @@ public class IpAddressServiceImpl implements IpAddressService {
 
     @Override
     public IpAddressEntity findByIpAddress(String ipAddress){
-        return ipAddressRepository.findByIpAddress(ipAddress);
+        return ipAddressRepository.findByIpAddress(ipAddress).get();
     }
 
     @Override
@@ -35,10 +35,5 @@ public class IpAddressServiceImpl implements IpAddressService {
     @Override
     public List<IpAddressEntity> findBlockedIpAddresses() {
         return ipAddressRepository.findBlockedIpAddresses();
-    }
-
-    @Override
-    public List<IpAddressEntity> saveAll(List<IpAddressEntity> ipAddressEntities) {
-        return ipAddressRepository.saveAll(ipAddressEntities);
     }
 }
