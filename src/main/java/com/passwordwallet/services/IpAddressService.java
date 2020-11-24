@@ -9,6 +9,8 @@ import java.util.List;
 public interface IpAddressService {
     IpAddressEntity findByIpAddress(String ipAddress);
 
+    IpAddressEntity findById(Integer id);
+
     IpAddressEntity save(IpAddressEntity ipAddressEntity);
 
     List<IpAddressEntity> findBlockedIpAddresses();

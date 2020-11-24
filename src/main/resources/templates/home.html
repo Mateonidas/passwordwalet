@@ -26,13 +26,22 @@
     <p th:inline="text">Last successful login: [[${session.lastSuccess}]]</p>
     <p th:inline="text">Last failed login: [[${session.lastFailure}]]</p>
 
-    <th:block th:if="${session.blockedIpAddresses != null}">
+    <th:block th:if="${session.blockedIpAddresses.size() > 0}">
         <p th:inline="text">Blocked IP addresses</p>
-        <div th:each="blockedIpAddress : ${session.blockedIpAddresses}">
-            <p th:text="${blockedIpAddress.getIpAddress}"></p>
-        </div>
+        <table>
+            <tbody>
+            <tr th:each="blockedIpAddress : ${session.blockedIpAddresses}">
+                <td th:text="${blockedIpAddress.getIpAddress()}"/>
+                <td>
+                    <a th:href="@{/unlockIP(ipId=${blockedIpAddress.getId()})}"
+                       class="btn btn-info btn-sm">
+                        Unlock
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </th:block>
-
     </br>
 
     <hr>

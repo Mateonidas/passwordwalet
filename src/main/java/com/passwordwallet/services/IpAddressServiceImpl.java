@@ -23,6 +23,11 @@ public class IpAddressServiceImpl implements IpAddressService {
     }
 
     @Override
+    public IpAddressEntity findById(Integer id) {
+        return ipAddressRepository.findById(id).get();
+    }
+
+    @Override
     public IpAddressEntity save(IpAddressEntity ipAddressEntity) {
         return ipAddressRepository.save(ipAddressEntity);
     }

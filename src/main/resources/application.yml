@@ -1,6 +1,5 @@
 spring:
   datasource:
-#TODO change timezone
     url: jdbc:mysql://localhost:3306/password_wallet?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
     username: root
     password: root

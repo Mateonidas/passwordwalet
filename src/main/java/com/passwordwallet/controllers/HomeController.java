@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -67,17 +68,12 @@ public class HomeController {
     }
 
     @GetMapping("/unlockIP")
-    public String unlockIp(){
+    public String unlockIp(@RequestParam("ipId") int id){
 
-        List<IpAddressEntity> blockedIpAddresses = ipAddressService.findBlockedIpAddresses();
+        IpAddressEntity blockedIpAddress = ipAddressService.findById(id);
+        blockedIpAddress.setIncorrectLoginTrial(0);
 
-        if(!blockedIpAddresses.isEmpty()){
-            blockedIpAddresses.forEach(ipAddressEntity ->{
-                ipAddressEntity.setIncorrectLoginTrial(0);
-            });
-        }
-
-        ipAddressService.saveAll(blockedIpAddresses);
+        ipAddressService.save(blockedIpAddress);
 
         return "redirect:";
     }
