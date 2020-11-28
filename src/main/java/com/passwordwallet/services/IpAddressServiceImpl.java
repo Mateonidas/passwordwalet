@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class IpAddressServiceImpl implements IpAddressService {
@@ -18,8 +19,8 @@ public class IpAddressServiceImpl implements IpAddressService {
     }
 
     @Override
-    public IpAddressEntity findByIpAddress(String ipAddress){
-        return ipAddressRepository.findByIpAddress(ipAddress).get();
+    public Optional<IpAddressEntity> findByIpAddress(String ipAddress){
+        return ipAddressRepository.findByIpAddress(ipAddress);
     }
 
     @Override

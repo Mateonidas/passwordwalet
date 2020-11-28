@@ -12,20 +12,19 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @Service
 public class UserBlockingService {
 
-    @Autowired
-    private HttpServletRequest request;
-
     UserService userService;
     LoginService loginService;
     IpAddressService ipAddressService;
-
     UserEntity userEntity;
     LoginEntity loginEntity;
     IpAddressEntity ipAddressEntity;
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     public UserBlockingService(UserService userService, LoginService loginService, IpAddressService ipAddressService) {
@@ -34,17 +33,20 @@ public class UserBlockingService {
         this.ipAddressService = ipAddressService;
     }
 
-    public void init(UserEntity user){
+    public void init(UserEntity user) {
         userEntity = user;
 
         String ipAddress = request.getRemoteAddr();
 
-        ipAddressEntity = ipAddressService.findByIpAddress(ipAddress);
 
-        if(ipAddressEntity == null){
+        Optional<IpAddressEntity> result = ipAddressService.findByIpAddress(ipAddress);
+
+        if (result.isEmpty()) {
             ipAddressEntity = new IpAddressEntity();
             ipAddressEntity.setIpAddress(ipAddress);
             ipAddressEntity.setIncorrectLoginTrial(0);
+        } else {
+            ipAddressEntity = result.get();
         }
 
         loginEntity = new LoginEntity();
@@ -53,17 +55,16 @@ public class UserBlockingService {
         loginEntity.setIpAddressByIpAddressId(ipAddressEntity);
         LoginEntity lastFailure = loginService.findLastTimestampWithFailure();
 
-        if(lastFailure != null){
-            if (checkIfBlockedByIP(lastFailure.getTime(), ipAddressEntity.getIncorrectLoginTrial())){
+        if (lastFailure != null) {
+            if (checkIfBlockedByIP(lastFailure.getTime(), ipAddressEntity.getIncorrectLoginTrial())) {
                 throw new DisabledException("User is blocked by IP address.");
-            }
-            else if (checkIfBlockedByAttempts(lastFailure.getTime(), user.getIncorrectLogins())) {
+            } else if (checkIfBlockedByAttempts(lastFailure.getTime(), user.getIncorrectLogins())) {
                 throw new DisabledException("User is blocked.");
             }
         }
     }
 
-    public void saveAfterSuccess(){
+    public void saveAfterSuccess() {
         userEntity.setIncorrectLogins(0);
         userService.save(userEntity);
 
@@ -74,7 +75,7 @@ public class UserBlockingService {
         loginService.save(loginEntity);
     }
 
-    public void saveAfterFailure(){
+    public void saveAfterFailure() {
         userEntity.setIncorrectLogins(userEntity.getIncorrectLogins() + 1);
         userService.save(userEntity);
 

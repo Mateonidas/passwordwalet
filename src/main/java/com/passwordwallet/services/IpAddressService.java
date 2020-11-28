@@ -4,10 +4,11 @@ import com.passwordwallet.entities.IpAddressEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface IpAddressService {
-    IpAddressEntity findByIpAddress(String ipAddress);
+    Optional<IpAddressEntity> findByIpAddress(String ipAddress);
 
     IpAddressEntity findById(Integer id);
 

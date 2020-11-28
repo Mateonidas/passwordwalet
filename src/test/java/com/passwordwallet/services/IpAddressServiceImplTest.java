@@ -34,7 +34,7 @@ class IpAddressServiceImplTest {
         when(ipAddressRepository.findByIpAddress(ipAddressEntity.getIpAddress()))
                 .thenReturn(java.util.Optional.of(ipAddressEntity));
 
-        IpAddressEntity find = ipAddressService.findByIpAddress(ipAddressEntity.getIpAddress());
+        IpAddressEntity find = ipAddressService.findByIpAddress(ipAddressEntity.getIpAddress()).get();
         MatcherAssert.assertThat(ipAddressEntity, equalTo(find));
     }
 
