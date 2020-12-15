@@ -1,14 +1,15 @@
-package com.passwordwallet.services;
+package com.passwordwallet.services.impl;
 
 import com.passwordwallet.entities.UserEntity;
 import com.passwordwallet.repositories.UserRepository;
+import com.passwordwallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
 
@@ -28,6 +29,23 @@ public class UserServiceImpl implements UserService{
             userEntity = result.get();
         } else {
             throw new RuntimeException("Did not find login - " + login);
+        }
+
+        return userEntity;
+
+    }
+
+    @Override
+    public UserEntity findByEmail(String email) {
+
+        Optional<UserEntity> result = userRepository.findByEmail(email);
+
+        UserEntity userEntity;
+
+        if(result.isPresent()){
+            userEntity = result.get();
+        } else {
+            throw new RuntimeException("Did not find email - " + email);
         }
 
         return userEntity;

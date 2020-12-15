@@ -1,8 +1,8 @@
 package com.passwordwallet.services;
 
 import com.passwordwallet.entities.IpAddressEntity;
-import com.passwordwallet.entities.PasswordEntity;
 import com.passwordwallet.repositories.IpAddressRepository;
+import com.passwordwallet.services.impl.IpAddressServiceImpl;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

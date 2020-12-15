@@ -55,6 +55,11 @@
     </form>
 
     <hr>
+    <form th:action="@{/modifyMode}" method="get">
+        <button type="submit" class="btn btn-info col-2">Set modify mode</button>
+    </form>
+
+    <hr>
     <form th:action="@{/logout}" method="post">
         <button type="submit" class="btn btn-danger btn-sm">Sign out</button>
     </form>

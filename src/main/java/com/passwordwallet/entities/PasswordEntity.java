@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,4 +40,21 @@ public class PasswordEntity {
     @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id", table = "password")
     private UserEntity userByIdUser;
+
+    @ManyToMany(mappedBy = "sharedPasswords", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<UserEntity> usersList;
+
+    public PasswordEntity() {
+    }
+
+    public PasswordEntity(PasswordEntity passwordEntity) {
+        this.id = passwordEntity.getId();
+        this.password = passwordEntity.getPassword();
+        this.idUser = passwordEntity.getIdUser();
+        this.webAddress = passwordEntity.getWebAddress();
+        this.description = passwordEntity.getDescription();
+        this.login = passwordEntity.getLogin();
+        this.userByIdUser = passwordEntity.getUserByIdUser();
+        this.usersList = passwordEntity.getUsersList();
+    }
 }

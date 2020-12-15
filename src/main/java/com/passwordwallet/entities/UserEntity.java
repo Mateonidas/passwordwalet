@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +21,10 @@ public class UserEntity {
     @Basic
     @Column(name = "login")
     private String login;
+
+    @Basic
+    @Column(name = "email")
+    private String email;
 
     @Basic
     @Column(name = "password_hash")
@@ -39,4 +44,7 @@ public class UserEntity {
     @Basic
     @Column(name = "incorrect_logins")
     private int incorrectLogins;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<PasswordEntity> sharedPasswords;
 }

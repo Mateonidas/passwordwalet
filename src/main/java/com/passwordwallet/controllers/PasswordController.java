@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -33,11 +34,24 @@ public class PasswordController {
         //Get user from session
         UserEntity user = (UserEntity) session.getAttribute("user");
         //Get users passwords
-        List<PasswordEntity> passwords = passwordService.findAllByIdUser(user.getId());
+        List<PasswordEntity> userPasswords = passwordService.findAllByIdUser(user.getId());
+        List<PasswordEntity> sharedPasswords = user.getSharedPasswords();
+
+        List<PasswordEntity> passwords = new ArrayList<>();
+
+        userPasswords.forEach(passwordEntity -> {
+            passwords.add(new PasswordEntity(passwordEntity));
+        });
+
+        sharedPasswords.forEach(passwordEntity -> {
+            passwords.add(new PasswordEntity(passwordEntity));
+        });
+
         //Hide passwords while viewing
         EncryptionService.hidePasswords(passwords, session);
 
         model.addAttribute("passwords", passwords);
+        model.addAttribute("user", user);
 
         return "passwords/list";
     }
@@ -161,5 +175,29 @@ public class PasswordController {
         }
 
         return "/passwords/change-password";
+    }
+
+    @GetMapping("/showFormForShare")
+    public String showFormForShare(@RequestParam("passwordId") int id, Model model, HttpSession session) {
+
+        PasswordEntity password = passwordService.findById(id);
+        session.setAttribute("passwordToShare", password);
+
+        return "passwords/share-form";
+    }
+
+    @PostMapping("/share")
+    public String share(@RequestParam(value = "email") String email, HttpSession session) {
+
+        PasswordEntity passwordToShare = (PasswordEntity) session.getAttribute("passwordToShare");
+
+        UserEntity user = userService.findByEmail(email);
+        List<PasswordEntity> sharedPassword = user.getSharedPasswords();
+        sharedPassword.add(passwordToShare);
+        user.setSharedPasswords(sharedPassword);
+
+        userService.save(user);
+
+        return "redirect:/passwords/list";
     }
 }

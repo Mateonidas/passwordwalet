@@ -2,6 +2,7 @@ package com.passwordwallet.services;
 
 import com.passwordwallet.entities.LoginEntity;
 import com.passwordwallet.repositories.LoginRepository;
+import com.passwordwallet.services.impl.LoginServiceImpl;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

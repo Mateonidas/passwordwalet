@@ -3,6 +3,7 @@ package com.passwordwallet.services;
 import com.passwordwallet.entities.PasswordEntity;
 import com.passwordwallet.repositories.PasswordRepository;
 import com.passwordwallet.security.EncryptionService;
+import com.passwordwallet.services.impl.PasswordServiceImpl;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -3,9 +3,6 @@
 
 <head>
     <title>Passwords list</title>
-
-    <link rel="stylesheet" th:href="@{/static/css/demo.css}"/>
-
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -13,6 +10,23 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <style>
+        form {
+            float: left;
+            margin-right: 5px;
+        }
+    </style>
+
+    <script>
+        function disableAlertMessage() {
+            alert('You have to switch to the modify mode to use this option.')
+        }
+
+        function notOwnerAlertMessage() {
+            alert('You have to be an owner to use this option.')
+        }
+    </script>
 </head>
 
 <body>
@@ -52,16 +66,60 @@
             <td th:text="${tempPassword.getDescription()}"/>
 
             <td>
-                <a th:href="@{/passwords/showFormForUpdate(passwordId=${tempPassword.getId()})}"
-                   class="btn btn-info btn-sm">
-                    Update
-                </a>
 
-                <a th:href="@{/passwords/delete(passwordId=${tempPassword.getId()})}"
-                   class="btn btn-danger btn-sm"
-                   onclick="if (!(confirm('Are you sure you want to delete this password?'))) return false">
-                    Delete
-                </a>
+                <form th:action="@{/passwords/showFormForShare}" method="get" class="form">
+                    <div style="display:inline-block; position:relative;">
+                        <button type="submit" class="btn btn-info btn-sm"
+                                th:name="passwordId"
+                                th:value="${tempPassword.getId()}"
+                                th:disabled="${!(session.user.getId() == tempPassword.getIdUser())}"
+                        >Share
+                        </button>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="notOwnerAlertMessage()"
+                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}"
+                        ></div>
+                    </div>
+                </form>
+
+                <form th:action="@{/passwords/showFormForUpdate}" method="get" class="form">
+                    <div style="display:inline-block; position:relative;">
+                        <button type="submit" class="btn btn-info btn-sm"
+                                th:name="passwordId"
+                                th:value="${tempPassword.getId()}"
+                                th:disabled="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
+                        >Update
+                        </button>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="disableAlertMessage()"
+                             th:if="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
+                        ></div>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="notOwnerAlertMessage()"
+                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}"
+                        ></div>
+                    </div>
+                </form>
+
+                <form th:action="@{/passwords/delete}" method="get" class="form">
+                    <div style="display:inline-block; position:relative;">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                th:name="passwordId"
+                                th:value="${tempPassword.getId()}"
+                                th:disabled="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
+                        >Delete
+                        </button>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="disableAlertMessage()"
+                             th:if="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}">
+                        </div>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="notOwnerAlertMessage()"
+                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}"
+                        ></div>
+                    </div>
+                </form>
+
             </td>
         </tr>
         </tbody>

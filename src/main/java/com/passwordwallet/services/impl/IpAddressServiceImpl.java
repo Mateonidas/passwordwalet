@@ -1,7 +1,8 @@
-package com.passwordwallet.services;
+package com.passwordwallet.services.impl;
 
 import com.passwordwallet.entities.IpAddressEntity;
 import com.passwordwallet.repositories.IpAddressRepository;
+import com.passwordwallet.services.IpAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

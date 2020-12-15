@@ -31,7 +31,10 @@ public class HomeController {
 
     //Mapping for login page
     @RequestMapping("/login")
-    public String login() {
+    public String login(HttpSession session) {
+
+        session.setAttribute("modifyMode", false);
+
         return "login";
     }
 
@@ -45,6 +48,7 @@ public class HomeController {
 
         //Save user in session
         session.setAttribute("user", user);
+
         //Clear passwordToShow attribute to hide all passwords on display again
         session.setAttribute("passwordToShow", null);
 
@@ -53,7 +57,6 @@ public class HomeController {
 
         List<IpAddressEntity> blockedIpAddresses = ipAddressService.findBlockedIpAddresses();
 
-        //TODO change time format
         session.setAttribute("lastSuccess", lastSuccess.getTime());
 
         if(lastFailure != null) {
@@ -74,6 +77,13 @@ public class HomeController {
         blockedIpAddress.setIncorrectLoginTrial(0);
 
         ipAddressService.save(blockedIpAddress);
+
+        return "redirect:";
+    }
+
+    @GetMapping("/modifyMode")
+    public String modifyMode(HttpSession session){
+        session.setAttribute("modifyMode", true);
 
         return "redirect:";
     }
