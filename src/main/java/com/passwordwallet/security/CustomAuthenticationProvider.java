@@ -44,7 +44,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         if (EncryptionService.encryptMasterPassword(password, user.getSalt(), user.getUsedAlgorithm())
                 .equals(user.getPasswordHash())) {
             EncryptionService.setPlainPassword(password);
-
+            EncryptionService.setHashedPassword(user.getPasswordHash());
             userBlockingService.saveAfterSuccess();
 
             return new UsernamePasswordAuthenticationToken(login, password, authentication.getAuthorities());

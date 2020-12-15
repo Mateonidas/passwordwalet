@@ -53,6 +53,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserEntity findById(int id) {
+
+        Optional<UserEntity> result = userRepository.findById(id);
+
+        UserEntity userEntity;
+
+        if(result.isPresent()){
+            userEntity = result.get();
+        } else {
+            throw new RuntimeException("Did not find user with id - " + id);
+        }
+
+        return userEntity;
+
+    }
+
+    @Override
     public void save(UserEntity user) {
         userRepository.save(user);
     }

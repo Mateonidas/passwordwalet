@@ -48,7 +48,7 @@ public class PasswordController {
         });
 
         //Hide passwords while viewing
-        EncryptionService.hidePasswords(passwords, session);
+        hidePasswords(passwords, session, user);
 
         model.addAttribute("passwords", passwords);
         model.addAttribute("user", user);
@@ -167,7 +167,9 @@ public class PasswordController {
             //Get all user passwords
             List<PasswordEntity> passwords = passwordService.findAllByIdUser(user.getId());
             //Change passwords encryption due to the change of encryption of master password
-            passwords = EncryptionService.changePasswordsEncryption(passwords, password);
+//            passwords = EncryptionService.changePasswordsEncryption(passwords, password);
+            EncryptionService.setPlainPassword(newPassword.getNewPassword());
+            passwords = EncryptionService.changePasswordsEncryption(passwords, user.getPasswordHash());
             //Save all passwords
             passwordService.saveAll(passwords);
 
@@ -178,7 +180,7 @@ public class PasswordController {
     }
 
     @GetMapping("/showFormForShare")
-    public String showFormForShare(@RequestParam("passwordId") int id, Model model, HttpSession session) {
+    public String showFormForShare(@RequestParam("passwordId") int id, HttpSession session) {
 
         PasswordEntity password = passwordService.findById(id);
         session.setAttribute("passwordToShare", password);
@@ -191,13 +193,54 @@ public class PasswordController {
 
         PasswordEntity passwordToShare = (PasswordEntity) session.getAttribute("passwordToShare");
 
-        UserEntity user = userService.findByEmail(email);
-        List<PasswordEntity> sharedPassword = user.getSharedPasswords();
-        sharedPassword.add(passwordToShare);
-        user.setSharedPasswords(sharedPassword);
+        try {
+            UserEntity user = userService.findByEmail(email);
+            List<PasswordEntity> sharedPassword = user.getSharedPasswords();
+            sharedPassword.add(passwordToShare);
+            user.setSharedPasswords(sharedPassword);
 
-        userService.save(user);
+            userService.save(user);
 
-        return "redirect:/passwords/list";
+            return "redirect:/passwords/list";
+        } catch (RuntimeException e) {
+            session.setAttribute("emailError", e.getMessage());
+            return "redirect:/passwords/showFormForShare?passwordId=" + passwordToShare.getId();
+        }
+    }
+
+    public List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session, UserEntity user) {
+
+        //Check if any of the passwords have been marked as visible
+        if (session.getAttribute("passwordToShow") != null) {
+            int id = (int) session.getAttribute("passwordToShow");
+
+            //Decrypt chosen password and hide the rest
+            passwords.forEach(password -> {
+                if (password.getId() == id) {
+                    try {
+                        if(password.getIdUser() != user.getId()) {
+                            password.setPassword(
+                                    EncryptionService.decryptAES(password.getPassword(),
+                                        userService.findById(password.getIdUser()).getPasswordHash()
+                                            ));
+                        }
+                        else {
+                            password.setPassword(EncryptionService.decryptAES(password.getPassword(), null));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    password.setPassword("**********");
+                }
+            });
+        } else {
+            //Hide all passwords
+            passwords.forEach(password -> {
+                password.setPassword("**********");
+            });
+        }
+
+        return passwords;
     }
 }

@@ -1,6 +1,7 @@
 package com.passwordwallet.security;
 
 import com.passwordwallet.entities.PasswordEntity;
+import com.passwordwallet.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class EncryptionService {
     private static String hmacKey;
     private static String pepper;
     private static String plainPassword;
+    public static String hashedPassword;
 
     @Value("${properties.hmac-key}")
     public void setHmacKey(String hmacKey) {
@@ -38,6 +40,14 @@ public class EncryptionService {
 
     public static void setPlainPassword(String plainPassword) {
         EncryptionService.plainPassword = plainPassword;
+    }
+
+    public static String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public static void setHashedPassword(String hashedPassword) {
+        EncryptionService.hashedPassword = hashedPassword;
     }
 
     //Encryption of master password
@@ -137,7 +147,7 @@ public class EncryptionService {
             if (receivedKey != null) {
                 key = receivedKey;
             } else {
-                key = generateKey(plainPassword);
+                key = generateKey(hashedPassword);
             }
 
             Cipher c = Cipher.getInstance(ALGO);
@@ -150,14 +160,14 @@ public class EncryptionService {
     }
 
     //decrypts string and returns plain text
-    public static String decryptAES(String encryptedData, Key receivedKey) {
+    public static String decryptAES(String encryptedData, String receivedKey) {
         try {
             Key key;
 
             if (receivedKey != null) {
-                key = receivedKey;
+                key = generateKey(receivedKey);
             } else {
-                key = generateKey(plainPassword);
+                key = generateKey(hashedPassword);
             }
 
             Cipher c = Cipher.getInstance(ALGO);
@@ -168,35 +178,6 @@ public class EncryptionService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    //Hide user passwords
-    public static List<PasswordEntity> hidePasswords(List<PasswordEntity> passwords, HttpSession session) {
-
-        //Check if any of the passwords have been marked as visible
-        if (session.getAttribute("passwordToShow") != null) {
-            int id = (int) session.getAttribute("passwordToShow");
-
-            //Decrypt chosen password and hide the rest
-            passwords.forEach(password -> {
-                if (password.getId() == id) {
-                    try {
-                        password.setPassword(EncryptionService.decryptAES(password.getPassword(), null));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    password.setPassword("**********");
-                }
-            });
-        } else {
-            //Hide all passwords
-            passwords.forEach(password -> {
-                password.setPassword("**********");
-            });
-        }
-
-        return passwords;
     }
 
     //Change passwords encryption after changing the master password
@@ -216,7 +197,7 @@ public class EncryptionService {
         });
 
         //Store new plain password to further password encryption
-        EncryptionService.setPlainPassword(newPassword);
+        EncryptionService.setHashedPassword(newPassword);
         return passwords;
     }
 }

@@ -56,7 +56,8 @@
 
     <hr>
     <form th:action="@{/modifyMode}" method="get">
-        <button type="submit" class="btn btn-info col-2">Set modify mode</button>
+        <button type="submit" class="btn btn-info col-2"
+                th:disabled="${session.modifyMode == true}">Set modify mode</button>
     </form>
 
     <hr>

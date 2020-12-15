@@ -45,7 +45,7 @@ class EncryptionServiceTest {
         Key key = EncryptionService.generateKey("testKey");
         var encryptedPassword = EncryptionService.encryptAES(password, key);
 
-        var decryptedPassword = EncryptionService.decryptAES(encryptedPassword, key);
+        var decryptedPassword = EncryptionService.decryptAES(encryptedPassword, "testKey");
 
         MatcherAssert.assertThat(decryptedPassword, equalTo(password));
     }

@@ -9,5 +9,7 @@ public interface UserService {
 
     UserEntity findByEmail(String email);
 
+    UserEntity findById(int id);
+
     void save(UserEntity user);
 }
