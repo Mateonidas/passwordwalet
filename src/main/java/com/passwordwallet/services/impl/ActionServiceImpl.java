@@ -22,7 +22,7 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public List<ActionEntity> findAllByUser(UserEntity user){
-        return actionRepository.findByUser(user);
+        return actionRepository.findByUserOrderByIdDesc(user);
     }
 
 }

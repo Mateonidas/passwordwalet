@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Backup list</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <style>
+        form {
+            float: left;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h3>Password Wallet</h3>
+    <hr>
+
+    <a th:href="@{/}"
+       class="btn btn-primary btn-sm mb-3">
+        Return to Home Page
+    </a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>Login</th>
+            <th>Password</th>
+            <th>Web address</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempPassword : ${passwords}">
+            <td th:text="${tempPassword.getLogin()}"/>
+            <td>
+                <a th:href="@{/passwords/showPassword(passwordId=${tempPassword.getId()})}"
+                   th:text="${tempPassword.getPassword()}"/>
+            </td>
+            <td th:text="${tempPassword.getWebAddress()}"/>
+            <td th:text="${tempPassword.getDescription()}"/>
+
+            <td>
+
+                <form th:action="@{/backup/chooseBackup}" method="get" class="form">
+                    <div style="display:inline-block; position:relative;">
+                        <button type="submit" class="btn btn-info btn-sm"
+                                th:name="passwordId"
+                                th:value="${tempPassword.getId()}"
+                        >Choose
+                        </button>
+                    </div>
+                </form>
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+
+</html>

@@ -37,6 +37,10 @@ public class PasswordEntity {
     @Column(name = "login")
     private String login;
 
+    @Basic
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id", table = "password")
     private UserEntity userByIdUser;

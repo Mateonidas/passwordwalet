@@ -61,6 +61,8 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void deleteById(int id) {
-        passwordRepository.deleteById(id);
+        PasswordEntity passwordEntity = findById(id);
+        passwordEntity.setIsDeleted(true);
+        save(passwordEntity);
     }
 }

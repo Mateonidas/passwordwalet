@@ -13,5 +13,5 @@ import java.util.Optional;
 @Repository
 public interface ActionRepository extends JpaRepository<ActionEntity, Integer> {
 
-    List<ActionEntity> findByUser(UserEntity user);
+    List<ActionEntity> findByUserOrderByIdDesc(UserEntity user);
 }

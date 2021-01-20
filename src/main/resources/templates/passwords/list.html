@@ -90,14 +90,39 @@
                                 th:disabled="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
                         >Update
                         </button>
+
                         <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
                              onclick="disableAlertMessage()"
-                             th:if="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
-                        ></div>
+                             th:if="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}">
+
+                        </div>
                         <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
                              onclick="notOwnerAlertMessage()"
-                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}"
-                        ></div>
+                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}">
+
+                        </div>
+                    </div>
+                </form>
+
+                <form th:action="@{/backup/listBackup}" method="get" class="form">
+                    <div style="display:inline-block; position:relative;">
+                        <button type="submit" class="btn btn-info btn-sm"
+                                th:name="passwordId"
+                                th:value="${tempPassword.getId()}"
+                                th:disabled="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}"
+                        >Versions
+                        </button>
+
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="disableAlertMessage()"
+                             th:if="${session.modifyMode == false || !(session.user.getId() == tempPassword.getIdUser())}">
+
+                        </div>
+                        <div style="position:absolute; left:0; right:0; top:0; bottom:0; cursor: pointer;"
+                             onclick="notOwnerAlertMessage()"
+                             th:if="${!(session.user.getId() == tempPassword.getIdUser())}">
+
+                        </div>
                     </div>
                 </form>
 

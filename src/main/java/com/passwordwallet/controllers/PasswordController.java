@@ -48,11 +48,15 @@ public class PasswordController {
         List<PasswordEntity> passwords = new ArrayList<>();
 
         userPasswords.forEach(passwordEntity -> {
-            passwords.add(new PasswordEntity(passwordEntity));
+            if (!passwordEntity.getIsDeleted()) {
+                passwords.add(new PasswordEntity(passwordEntity));
+            }
         });
 
         sharedPasswords.forEach(passwordEntity -> {
-            passwords.add(new PasswordEntity(passwordEntity));
+            if (!passwordEntity.getIsDeleted()) {
+                passwords.add(new PasswordEntity(passwordEntity));
+            }
         });
 
         //Hide passwords while viewing
