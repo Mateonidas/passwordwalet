@@ -35,6 +35,11 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
+    public boolean existsById(int id) {
+        return passwordRepository.existsById(id);
+    }
+
+    @Override
     public List<PasswordEntity> findAllByIdUser(int idUser) {
         return passwordRepository.findAllByIdUser(idUser);
     }

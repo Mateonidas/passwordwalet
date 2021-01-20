@@ -1,18 +1,23 @@
 package com.passwordwallet.controllers;
 
+import com.passwordwallet.entities.ActionEntity;
 import com.passwordwallet.entities.PasswordEntity;
 import com.passwordwallet.entities.UserEntity;
 import com.passwordwallet.objects.NewPassword;
 import com.passwordwallet.security.EncryptionService;
+import com.passwordwallet.services.ActionService;
 import com.passwordwallet.services.PasswordService;
 import com.passwordwallet.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -21,6 +26,9 @@ public class PasswordController {
 
     UserService userService;
     PasswordService passwordService;
+
+    @Autowired
+    ActionService actionService;
 
     public PasswordController(UserService userService, PasswordService passwordService) {
         this.userService = userService;
@@ -84,8 +92,18 @@ public class PasswordController {
 
     //Mapping for deleting password
     @GetMapping("/delete")
-    public String delete(@RequestParam("passwordId") int id) {
+    public String delete(@RequestParam("passwordId") int id, HttpSession session) {
+
         passwordService.deleteById(id);
+
+        UserEntity user = (UserEntity) session.getAttribute("user");
+
+        Date date = new Date();
+        ActionEntity action = new ActionEntity();
+        action.setTime(new Timestamp(date.getTime()));
+        action.setUser(user);
+        action.setActionName("DELETE");
+        actionService.save(action);
 
         return "redirect:/passwords/list";
     }
@@ -99,6 +117,19 @@ public class PasswordController {
         password.setPassword(EncryptionService.encryptAES(password.getPassword(), null));
 
         passwordService.save(password);
+
+        Date date = new Date();
+        ActionEntity action = new ActionEntity();
+        action.setTime(new Timestamp(date.getTime()));
+        action.setUser(user);
+
+        if (passwordService.existsById(password.getId())) {
+            action.setActionName("UPDATE");
+        } else {
+            action.setActionName("CREATE");
+        }
+
+        actionService.save(action);
 
         return "redirect:/passwords/list";
     }
@@ -201,6 +232,15 @@ public class PasswordController {
 
             userService.save(user);
 
+            UserEntity actualUser = (UserEntity) session.getAttribute("user");
+
+            Date date = new Date();
+            ActionEntity action = new ActionEntity();
+            action.setTime(new Timestamp(date.getTime()));
+            action.setUser(actualUser);
+            action.setActionName("SHARE");
+            actionService.save(action);
+
             return "redirect:/passwords/list";
         } catch (RuntimeException e) {
             session.setAttribute("emailError", e.getMessage());
@@ -218,13 +258,12 @@ public class PasswordController {
             passwords.forEach(password -> {
                 if (password.getId() == id) {
                     try {
-                        if(password.getIdUser() != user.getId()) {
+                        if (password.getIdUser() != user.getId()) {
                             password.setPassword(
                                     EncryptionService.decryptAES(password.getPassword(),
-                                        userService.findById(password.getIdUser()).getPasswordHash()
-                                            ));
-                        }
-                        else {
+                                            userService.findById(password.getIdUser()).getPasswordHash()
+                                    ));
+                        } else {
                             password.setPassword(EncryptionService.decryptAES(password.getPassword(), null));
                         }
                     } catch (Exception e) {

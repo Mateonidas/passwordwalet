@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Action list</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <style>
+        form {
+            float: left;
+            margin-right: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="container">
+    <h3>Password Wallet</h3>
+    <hr>
+
+    <a th:href="@{/}"
+       class="btn btn-primary btn-sm mb-3">
+        Return to Home Page
+    </a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Action Name</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempAction : ${actions}">
+            <td th:text="${tempAction.getId()}"/>
+            <td th:text="${tempAction.getActionName()}"/>
+            <td th:text="${tempAction.getTime()}"/>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+
+</html>

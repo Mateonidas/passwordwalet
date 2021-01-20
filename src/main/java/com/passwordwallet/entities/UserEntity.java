@@ -47,4 +47,7 @@ public class UserEntity {
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<PasswordEntity> sharedPasswords;
+
+    @OneToMany(mappedBy = "user")
+    private Collection<ActionEntity> actions;
 }

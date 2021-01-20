@@ -9,6 +9,9 @@ import java.util.List;
 public interface PasswordService {
 
     PasswordEntity findById(int id);
+
+    boolean existsById(int id);
+
     List<PasswordEntity> findAllByIdUser(int idUser);
     List<PasswordEntity> findAll();
     void save(PasswordEntity password);
