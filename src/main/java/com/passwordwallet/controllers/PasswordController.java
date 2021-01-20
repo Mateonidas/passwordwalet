@@ -1,11 +1,13 @@
 package com.passwordwallet.controllers;
 
 import com.passwordwallet.entities.ActionEntity;
+import com.passwordwallet.entities.PasswordBackupEntity;
 import com.passwordwallet.entities.PasswordEntity;
 import com.passwordwallet.entities.UserEntity;
 import com.passwordwallet.objects.NewPassword;
 import com.passwordwallet.security.EncryptionService;
 import com.passwordwallet.services.ActionService;
+import com.passwordwallet.services.PasswordBackupService;
 import com.passwordwallet.services.PasswordService;
 import com.passwordwallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +26,17 @@ import java.util.List;
 @RequestMapping("/passwords")
 public class PasswordController {
 
+    @Autowired
     UserService userService;
+
+    @Autowired
     PasswordService passwordService;
 
     @Autowired
     ActionService actionService;
 
-    public PasswordController(UserService userService, PasswordService passwordService) {
-        this.userService = userService;
-        this.passwordService = passwordService;
-    }
+    @Autowired
+    PasswordBackupService passwordBackupService;
 
     //Mapping for page with list of passwords
     @GetMapping("/list")
@@ -47,14 +50,16 @@ public class PasswordController {
 
         List<PasswordEntity> passwords = new ArrayList<>();
 
+        boolean showDeleted = (boolean) session.getAttribute("showDeleted");
+
         userPasswords.forEach(passwordEntity -> {
-            if (!passwordEntity.getIsDeleted()) {
+            if (!passwordEntity.getIsDeleted() || showDeleted) {
                 passwords.add(new PasswordEntity(passwordEntity));
             }
         });
 
         sharedPasswords.forEach(passwordEntity -> {
-            if (!passwordEntity.getIsDeleted()) {
+            if (!passwordEntity.getIsDeleted() || showDeleted) {
                 passwords.add(new PasswordEntity(passwordEntity));
             }
         });
@@ -66,6 +71,13 @@ public class PasswordController {
         model.addAttribute("user", user);
 
         return "passwords/list";
+    }
+
+    @GetMapping("/showDeleted")
+    public String showDeleted(HttpSession session){
+        session.setAttribute("showDeleted", true);
+
+        return "redirect:/passwords/list";
     }
 
     //Mapping for page with adding new password
@@ -119,8 +131,7 @@ public class PasswordController {
         password.setUserByIdUser(user);
         //Encrypting password after it is saved
         password.setPassword(EncryptionService.encryptAES(password.getPassword(), null));
-
-        passwordService.save(password);
+        password.setIsDeleted(false);
 
         Date date = new Date();
         ActionEntity action = new ActionEntity();
@@ -132,6 +143,17 @@ public class PasswordController {
         } else {
             action.setActionName("CREATE");
         }
+
+        passwordService.save(password);
+
+        PasswordBackupEntity backup = new PasswordBackupEntity();
+        backup.setDescription(password.getDescription());
+        backup.setLogin(password.getLogin());
+        backup.setPassword(password.getPassword());
+        backup.setWebAddress(password.getWebAddress());
+        backup.setPasswordEntity(password);
+
+        passwordBackupService.save(backup);
 
         actionService.save(action);
 

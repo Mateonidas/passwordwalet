@@ -50,6 +50,8 @@ public class HomeController {
         //Save user in session
         session.setAttribute("user", user);
 
+        session.setAttribute("showDeleted", false);
+
         //Clear passwordToShow attribute to hide all passwords on display again
         session.setAttribute("passwordToShow", null);
 
